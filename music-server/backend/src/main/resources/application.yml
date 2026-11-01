@@ -1,0 +1,41 @@
+server:
+  port: ${SERVER_PORT:8080}
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
+
+spring:
+  application:
+    name: yama-music-server
+  datasource:
+    url: ${SPRING_DATASOURCE_URL:jdbc:postgresql://localhost:5432/yama_music}
+    username: ${SPRING_DATASOURCE_USERNAME:yama_user}
+    password: ${SPRING_DATASOURCE_PASSWORD:yama_secure_password_dev}
+    driver-class-name: org.postgresql.Driver
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 2
+      connection-timeout: 20000
+  jpa:
+    hibernate:
+      ddl-auto: update
+    open-in-view: false
+    show-sql: false
+    properties:
+      hibernate:
+        format_sql: true
+
+yama:
+  music:
+    library-path: ${MUSIC_LIBRARY_PATH:/music}
+    artwork-path: ${ARTWORK_PATH:/artwork}
+    supported-extensions:
+      - mp3
+      - flac
+      - m4a
+      - aac
+      - ogg
+      - wav
+  downloader:
+    url: ${DOWNLOADER_URL:http://downloader:5000}
+

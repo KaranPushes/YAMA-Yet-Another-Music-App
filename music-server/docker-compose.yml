@@ -1,0 +1,89 @@
+services:
+  postgres:
+    image: postgres:16-alpine
+    container_name: yama-postgres
+    restart: unless-stopped
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-yama_music}
+      POSTGRES_USER: ${POSTGRES_USER:-yama_user}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-yama_secure_password_dev}
+    ports:
+      - "${POSTGRES_PORT:-5432}:5432"
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-yama_user} -d ${POSTGRES_DB:-yama_music}"]
+      interval: 5s
+      timeout: 5s
+      retries: 5
+
+  downloader:
+    build:
+      context: ./downloader
+      dockerfile: Dockerfile
+    container_name: yama-downloader
+    restart: unless-stopped
+    environment:
+      MUSIC_DOWNLOAD_PATH: /music
+      SPOTIPY_CLIENT_ID: ${SPOTIPY_CLIENT_ID:-}
+      SPOTIPY_CLIENT_SECRET: ${SPOTIPY_CLIENT_SECRET:-}
+      PORT: 5000
+    volumes:
+      - ${HOST_MUSIC_DIR:-./music}:/music:rw
+    healthcheck:
+      test: ["CMD", "curl", "-f", "http://localhost:5000/health"]
+      interval: 10s
+      timeout: 5s
+      retries: 3
+
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    container_name: yama-backend
+    restart: unless-stopped
+    depends_on:
+      postgres:
+        condition: service_healthy
+      downloader:
+        condition: service_started
+    environment:
+      SPRING_DATASOURCE_URL: ${SPRING_DATASOURCE_URL:-jdbc:postgresql://postgres:5432/yama_music}
+      SPRING_DATASOURCE_USERNAME: ${SPRING_DATASOURCE_USERNAME:-yama_user}
+      SPRING_DATASOURCE_PASSWORD: ${SPRING_DATASOURCE_PASSWORD:-yama_secure_password_dev}
+      MUSIC_LIBRARY_PATH: /music
+      ARTWORK_PATH: /artwork
+      DOWNLOADER_URL: ${DOWNLOADER_URL:-http://downloader:5000}
+      SERVER_PORT: 8080
+    ports:
+      - "${HOST_SERVER_PORT:-${SERVER_PORT:-7080}}:8080"
+    volumes:
+      - ${HOST_MUSIC_DIR:-./music}:/music:rw
+      - ${HOST_ARTWORK_DIR:-./artwork}:/artwork:rw
+    healthcheck:
+      test: ["CMD-SHELL", "curl -f http://localhost:8080/api/health || exit 1"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+
+  ngrok:
+    image: ngrok/ngrok:latest
+    container_name: yama-ngrok
+    restart: unless-stopped
+    command:
+      - "http"
+      - "backend:8080"
+      - "--url=${NGROK_DOMAIN}"
+    environment:
+      NGROK_AUTHTOKEN: ${NGROK_AUTHTOKEN:-}
+    ports:
+      - "4040:4040"
+    depends_on:
+      backend:
+        condition: service_healthy
+    profiles:
+      - tunnel
+
+volumes:
+  postgres_data:
+    name: yama_postgres_data

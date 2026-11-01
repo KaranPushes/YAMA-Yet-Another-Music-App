@@ -1,0 +1,126 @@
+# ==============================================================================
+# YAMA (Yet Another Music App) - Comprehensive Git Ignore
+# ==============================================================================
+
+# --- Environment & Secrets ---
+.env
+.env.*
+*.env
+*.env.*
+*.env.local
+music-server/.env
+mobile-app/.env
+!.env.example
+!music-server/.env.example
+!mobile-app/.env.example
+
+# --- Local Run / Launcher Scripts (Kept locally only) ---
+*.command
+start.command
+stop.command
+server.sh
+music-server/server.sh
+tunnel.sh
+music-server/tunnel.sh
+
+
+# --- Logs & Runtime PIDs ---
+*.log
+*.pid
+ngrok.log
+ngrok.pid
+music-server/ngrok.log
+music-server/ngrok.pid
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# --- Operating System Files ---
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+
+# --- Media & Caching Volumes (Audio files & album covers) ---
+# Audio binaries must not be committed to GitHub
+*.mp3
+*.flac
+*.m4a
+*.wav
+*.aac
+*.ogg
+*.wma
+*.alac
+
+# Docker volumes
+music-server/music/*
+!music-server/music/.gitkeep
+music-server/artwork/*
+!music-server/artwork/.gitkeep
+
+# --- Node / JavaScript Dependencies & Build ---
+node_modules/
+*/node_modules/
+dist/
+web-build/
+.pnp/
+.pnp.js
+coverage/
+
+# --- React Native / Expo ---
+.expo/
+*/.expo/
+.expo-shared/
+
+# --- iOS (React Native) ---
+ios/Pods/
+ios/build/
+ios/DerivedData/
+ios/.xcode.env.local
+*.xcworkspace
+!ios/YAMA.xcworkspace
+xcuserdata/
+*.pbxuser
+*.mode1v3
+*.mode2v3
+*.perspectivev3
+
+# --- Android (React Native) ---
+android/.gradle/
+android/build/
+android/app/build/
+android/app/.cxx/
+android/local.properties
+# Keystores (allow debug keystore, ignore any release keystores)
+*.jks
+*.keystore
+!android/app/debug.keystore
+
+# --- Java / Maven / Backend ---
+target/
+*/target/
+*.class
+*.war
+.gradle/
+*.jar
+!**/gradle-wrapper.jar
+!**/maven-wrapper.jar
+
+# --- IDEs & Code Editors ---
+.idea/
+*.iml
+.vscode/
+*.swp
+*.swo
+*~
+.project
+.classpath
+.settings/
+
+# --- Scripts ---
+server.sh
+start.command
+stop.command
